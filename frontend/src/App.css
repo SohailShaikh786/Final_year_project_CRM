@@ -1,0 +1,33 @@
+.App {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.customer-card {
+  transition: all 0.3s ease;
+  cursor: grab;
+}
+
+.customer-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.map-container {
+  height: 500px;
+  width: 100%;
+}
+
+.badge {
+  padding: 0.5em 0.8em;
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+} 
