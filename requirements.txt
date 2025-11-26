@@ -184,7 +184,7 @@ Mako==1.3.10
 Markdown==3.10
 markdown-it-py==4.0.0
 MarkupSafe==3.0.3
-matplot==0.1.9
+matplot==0.1.9p
 matplotlib==3.10.7
 matplotlib-colors==1.0.16
 matplotlib-inline==0.1.6
@@ -237,7 +237,7 @@ pathlib==1.0.1
 pd==0.0.4
 pillow==12.0.0
 pipwin==0.5.2
-pkg-about==1.2.1
+
 pkginfo==1.10.0
 platformdirs==4.1.0
 plotly==5.24.1
