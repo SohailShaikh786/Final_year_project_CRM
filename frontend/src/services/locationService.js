@@ -5,7 +5,11 @@ const updateLocation = async (latitude, longitude) => {
     const response = await axios.post('/api/locations', { latitude, longitude });
     return response.data;
   } catch (error) {
-    throw error;
+    let message = 'Failed to update location';
+    if (error.response && error.response.data && error.response.data.message) {
+      message = error.response.data.message;
+    }
+    throw new Error(message);
   }
 };
 
@@ -14,7 +18,11 @@ const getLocations = async () => {
     const response = await axios.get('/api/locations');
     return response.data;
   } catch (error) {
-    throw error;
+    let message = 'Failed to fetch locations';
+    if (error.response && error.response.data && error.response.data.message) {
+      message = error.response.data.message;
+    }
+    throw new Error(message);
   }
 };
 
@@ -23,7 +31,11 @@ const calculateDistance = async (lat1, lng1, lat2, lng2) => {
     const response = await axios.post('/api/distance', { lat1, lng1, lat2, lng2 });
     return response.data;
   } catch (error) {
-    throw error;
+    let message = 'Failed to calculate distance';
+    if (error.response && error.response.data && error.response.data.message) {
+      message = error.response.data.message;
+    }
+    throw new Error(message);
   }
 };
 
@@ -76,13 +88,41 @@ const stopLocationTracking = (trackingId) => {
   clearInterval(trackingId);
 };
 
+const planRoute = async (customerIds) => {
+  try {
+    const response = await axios.post('/api/route-planning', { customer_ids: customerIds });
+    return response.data;
+  } catch (error) {
+    let message = 'Failed to plan route';
+    if (error.response && error.response.data && error.response.data.message) {
+      message = error.response.data.message;
+    }
+    throw new Error(message);
+  }
+};
+
+const getCustomerAnalytics = async () => {
+  try {
+    const response = await axios.get('/api/customer-analytics');
+    return response.data;
+  } catch (error) {
+    let message = 'Failed to fetch customer analytics';
+    if (error.response && error.response.data && error.response.data.message) {
+      message = error.response.data.message;
+    }
+    throw new Error(message);
+  }
+};
+
 const locationService = {
   updateLocation,
   getLocations,
   calculateDistance,
   getCurrentLocation,
   startLocationTracking,
-  stopLocationTracking
+  stopLocationTracking,
+  planRoute,
+  getCustomerAnalytics
 };
 
 export default locationService; 

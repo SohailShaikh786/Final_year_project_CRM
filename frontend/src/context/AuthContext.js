@@ -12,11 +12,30 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user'));
+    const userStr = localStorage.getItem('user');
+    
+    console.log('🔍 AuthContext: Token exists:', !!token);
+    console.log('🔍 AuthContext: User string:', userStr);
 
-    if (token && user) {
-      setCurrentUser(user);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        console.log('🔍 AuthContext: Parsed user:', user);
+        
+        if (user && user.id && user.name) {
+          setCurrentUser(user);
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          console.log('✅ AuthContext: User authenticated successfully');
+        } else {
+          console.log('❌ AuthContext: Invalid user data, clearing localStorage');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
+      } catch (error) {
+        console.error('❌ AuthContext: Error parsing user data:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
     }
 
     setLoading(false);
@@ -26,30 +45,71 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post('/api/login', { email, password });
       const { access_token, user } = response.data;
-
+      if (!access_token || !user) {
+        // Backend did not return expected data
+        return {
+          success: false,
+          message: 'Login failed: Invalid server response.'
+        };
+      }
       localStorage.setItem('token', access_token);
       localStorage.setItem('user', JSON.stringify(user));
-
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       setCurrentUser(user);
-
       return { success: true };
     } catch (error) {
+      // Improved error feedback
+      let message = 'Login failed';
+      if (error.response && error.response.data && error.response.data.message) {
+        message = error.response.data.message;
+      }
       return {
         success: false,
-        message: error.response?.data?.message || 'Login failed'
+        message
       };
+    }
+  };
+
+  const loginWithGoogle = async (idToken) => {
+    try {
+      const response = await axios.post('/api/login/google', { id_token: idToken });
+      const { access_token, user } = response.data;
+      if (!access_token || !user) {
+        return { success: false, message: 'Google login failed: Invalid server response.' };
+      }
+      localStorage.setItem('token', access_token);
+      localStorage.setItem('user', JSON.stringify(user));
+      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+      setCurrentUser(user);
+      return { success: true };
+    } catch (error) {
+      let message = 'Google login failed';
+      if (error.response && error.response.data && error.response.data.message) {
+        message = error.response.data.message;
+      }
+      return { success: false, message };
     }
   };
 
   const register = async (name, email, password) => {
     try {
       const response = await axios.post('/api/register', { name, email, password });
+      if (response.status !== 201) {
+        return {
+          success: false,
+          message: response.data.message || 'Registration failed: Unexpected server response.'
+        };
+      }
       return { success: true };
     } catch (error) {
+      // Improved error feedback
+      let message = 'Registration failed';
+      if (error.response && error.response.data && error.response.data.message) {
+        message = error.response.data.message;
+      }
       return {
         success: false,
-        message: error.response?.data?.message || 'Registration failed'
+        message
       };
     }
   };
@@ -64,6 +124,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     currentUser,
     login,
+    loginWithGoogle,
     register,
     logout,
     loading

@@ -9,6 +9,8 @@ import Sales from './pages/Sales';
 import Locations from './pages/Locations';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import './App.css';
 import locationService from './services/locationService';
 
@@ -54,6 +56,8 @@ function App() {
         <Routes>
           <Route path="/login" element={!currentUser ? <Login /> : <Navigate to="/" />} />
           <Route path="/register" element={!currentUser ? <Register /> : <Navigate to="/" />} />
+          <Route path="/forgot-password" element={!currentUser ? <ForgotPassword /> : <Navigate to="/" />} />
+          <Route path="/reset-password/:token" element={!currentUser ? <ResetPassword /> : <Navigate to="/" />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
           <Route path="/customers/:id" element={<ProtectedRoute><CustomerDetail /></ProtectedRoute>} />

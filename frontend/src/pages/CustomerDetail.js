@@ -81,11 +81,11 @@ const CustomerDetail = () => {
       const customerResponse = await customerService.getCustomer(id);
       setCustomer(customerResponse);
       setCustomerData({
-        name: customerResponse.name,
-        email: customerResponse.email,
-        phone: customerResponse.phone,
-        company: customerResponse.company,
-        stage: customerResponse.stage,
+        name: customerResponse.name || '',
+        email: customerResponse.email || '',
+        phone: customerResponse.phone || '',
+        company: customerResponse.company || '',
+        stage: customerResponse.stage || 'New',
         lat: customerResponse.lat,
         lng: customerResponse.lng
       });
@@ -139,6 +139,20 @@ const CustomerDetail = () => {
     } catch (error) {
       console.error('Error creating interaction:', error);
       setError('Failed to create interaction');
+    }
+  };
+  
+  const handleDeleteInteraction = async (interactionId) => {
+    if (window.confirm('Are you sure you want to delete this interaction?')) {
+      try {
+        await interactionService.deleteInteraction(interactionId);
+        // Refresh interactions
+        const interactionsResponse = await interactionService.getInteractions(id);
+        setInteractions(interactionsResponse);
+      } catch (error) {
+        console.error('Error deleting interaction:', error);
+        setError('Failed to delete interaction');
+      }
     }
   };
   
@@ -234,19 +248,35 @@ const CustomerDetail = () => {
                 <Card.Body>
                   <Row className="mb-2">
                     <Col md={4} className="fw-bold">Name:</Col>
-                    <Col md={8}>{customer.name}</Col>
+                    <Col md={8}>{customer.name || 'Not provided'}</Col>
                   </Row>
                   <Row className="mb-2">
                     <Col md={4} className="fw-bold">Email:</Col>
-                    <Col md={8}>{customer.email || 'N/A'}</Col>
+                    <Col md={8}>
+                      {customer.email ? (
+                        <a href={`mailto:${customer.email}`}>{customer.email}</a>
+                      ) : (
+                        <span className="text-muted">Not provided</span>
+                      )}
+                    </Col>
                   </Row>
                   <Row className="mb-2">
                     <Col md={4} className="fw-bold">Phone:</Col>
-                    <Col md={8}>{customer.phone || 'N/A'}</Col>
+                    <Col md={8}>
+                      {customer.phone ? (
+                        <a href={`tel:${customer.phone}`}>{customer.phone}</a>
+                      ) : (
+                        <span className="text-muted">Not provided</span>
+                      )}
+                    </Col>
                   </Row>
                   <Row className="mb-2">
                     <Col md={4} className="fw-bold">Company:</Col>
-                    <Col md={8}>{customer.company || 'N/A'}</Col>
+                    <Col md={8}>{customer.company || <span className="text-muted">Not provided</span>}</Col>
+                  </Row>
+                  <Row className="mb-2">
+                    <Col md={4} className="fw-bold">Created:</Col>
+                    <Col md={8}>{new Date(customer.created_at).toLocaleDateString()}</Col>
                   </Row>
                   {distance && (
                     <Row className="mb-2">
@@ -372,6 +402,7 @@ const CustomerDetail = () => {
                       <th>Type</th>
                       <th>Note</th>
                       <th>Date</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -384,11 +415,31 @@ const CustomerDetail = () => {
                             interaction.type === 'email' ? 'bg-warning' :
                             'bg-secondary'
                           }`}>
+                            <i className={`fas ${
+                              interaction.type === 'call' ? 'fa-phone' :
+                              interaction.type === 'meeting' ? 'fa-calendar' :
+                              interaction.type === 'email' ? 'fa-envelope' :
+                              'fa-sticky-note'
+                            } me-1`}></i>
                             {interaction.type}
                           </span>
                         </td>
                         <td>{interaction.note}</td>
-                        <td>{new Date(interaction.timestamp).toLocaleDateString()}</td>
+                        <td>
+                          <small>{new Date(interaction.timestamp).toLocaleDateString()}</small>
+                          <br />
+                          <small className="text-muted">{new Date(interaction.timestamp).toLocaleTimeString()}</small>
+                        </td>
+                        <td>
+                          <Button 
+                            variant="outline-danger" 
+                            size="sm"
+                            onClick={() => handleDeleteInteraction(interaction.id)}
+                            title="Delete interaction"
+                          >
+                            <i className="fas fa-trash"></i>
+                          </Button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
